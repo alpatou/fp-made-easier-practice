@@ -1,0 +1,2 @@
+* linguist-vendored
+*.purescript linguist-vendored=false
