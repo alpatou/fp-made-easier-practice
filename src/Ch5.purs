@@ -53,6 +53,21 @@ last Nil = Nothing
 last (x:Nil) = Just x
 last (_:xs) = last xs
 
+init :: forall a. List a -> Maybe(List a)
+init Nil = Nothing
+init ( x : Nil ) = Just Nil
+init l = Just $ go l where
+  go Nil = Nil
+  go (_ : Nil) = Nil
+  go ( x : xs ) = x : go xs
+
+uncons :: forall a. List a -> Maybe { head :: a, tail :: List a }
+uncons Nil = Nothing
+uncons (x:xs) = Just { head: x, tail: xs}
+
+index :: forall a. List a -> Int -> Maybe a
+index l x = 
+
 test:: Effect Unit
 test = do
   log $ show $ flip const 1 2
@@ -68,3 +83,11 @@ test = do
   log $ show $ tail ("abc" : "123" : Nil)
   log $ show $ ( last Nil :: Maybe Unit )
   log $ show $ last $ "a" : "b" : "c" : Nil
+  log $ show $ init (Nil :: List Unit)
+  log $ show $ init ( 1 : Nil )
+  log $ show $ init ( 1 : 2 : Nil )
+  log $ show $ init ( 1 : 2 : 3 : Nil )
+  log $ show $ uncons (1 : 2 : 3 : Nil)
+  log $ show $ index (1 : Nil) 4 
+  log $ show $ index (1 : 2 : 3 : Nil) 1
+  log $ show $ index (Nil :: List Unit) 0 
