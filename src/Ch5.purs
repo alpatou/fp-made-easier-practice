@@ -1,10 +1,11 @@
 module Ch5 where
 
-import Prelude (Unit, (+), show, discard)
+import Prelude (Unit, (+), (-) , (>=), (/=), (==), negate, show, discard, otherwise, type (~>))
 import Data.List (List(Nil, Cons), (:))
 import Effect (Effect)
 import Effect.Console (log) 
 import Data.Maybe (Maybe(..))
+import Data.Ord ((<))
 
 flip:: forall a b c. (a->b->c) -> b -> a -> c
 flip func x y = func y x
@@ -66,7 +67,35 @@ uncons Nil = Nothing
 uncons (x:xs) = Just { head: x, tail: xs}
 
 index :: forall a. List a -> Int -> Maybe a
-index l x = 
+index Nil _ = Nothing
+index _ i | i < 0 = Nothing
+index (x : _) 0 = Just x
+index (_ : xs) i = index xs (i -1)
+
+infixl 8 index as !!  
+
+findIndex :: ∀ a. (a -> Boolean) -> List a -> Maybe Int
+findIndex _ Nil = Nothing
+findIndex predicate l = go 0 l where
+      go _ Nil = Nothing
+      go index (x : xs) = if predicate x then Just index else go (index + 1) xs
+
+findLastIndex :: ∀ a. (a -> Boolean) -> List a -> Maybe Int
+findLastIndex _ Nil = Nothing
+findLastIndex pred l =  go Nothing 0 l where 
+      go :: Maybe Int -> Int -> List a -> Maybe Int
+      go fi _ Nil = fi 
+      go fi i (x : xs) = go (if pred x then Just i else fi) (i + 1) xs 
+
+reverse:: List ~> List
+reverse l = go Nil l where
+  go newList Nil = newList
+  go newList (x : xs) = go (x : newList) xs
+
+concat :: forall a. List (List a) -> List a
+concat Nil = Nil
+concat (Nil : xss) = concat xss
+concat ((x : xs) : xss) = x : concat (xs : xss)
 
 test:: Effect Unit
 test = do
@@ -91,3 +120,12 @@ test = do
   log $ show $ index (1 : Nil) 4 
   log $ show $ index (1 : 2 : 3 : Nil) 1
   log $ show $ index (Nil :: List Unit) 0 
+  log $ show $ ( 1 : 2 : 3 : Nil ) !! 1
+  log $ show $ findIndex (_ >= 2) (1 : 2 : 3 : Nil) 
+  log $ show $ findIndex (_ >= 99) (1 : 2 : 3 : Nil) 
+  log $ show $ findIndex (10 /= _) (Nil :: List Int) 
+  log $ show $ findLastIndex (_ == 10) (Nil :: List Int)
+  log $ show $ findLastIndex (_ == 10) (10 : 5 : 10 : -1 : 2 : 10 : Nil)
+  log $ show $ findLastIndex (_ == 10) (11 : 12 : Nil)
+  log $ show $ reverse (10 : 20 : 30 : Nil)
+  log $ show $ concat ((1 : 2 : 3 : Nil) : (4 : 5 : Nil) : (6 : Nil) : (Nil) : Nil)
