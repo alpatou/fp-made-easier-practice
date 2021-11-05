@@ -1,6 +1,6 @@
 module Ch5 where
 
-import Prelude (Unit, (+), (-) , (>=), (/=), (==), negate, show, discard, otherwise, type (~>))
+import Prelude (Unit, (+), (-) ,(>), (<), (>=), (/=), (==), negate, show, discard, otherwise, type (~>))
 import Data.List (List(Nil, Cons), (:))
 import Effect (Effect)
 import Effect.Console (log) 
@@ -97,6 +97,19 @@ concat Nil = Nil
 concat (Nil : xss) = concat xss
 concat ((x : xs) : xss) = x : concat (xs : xss)
 
+--filter :: forall a. (a -> Boolean) -> List a -> List a
+--filter _ Nil = Nil
+--filter pred (x : xs)  -- this is the way 
+--  | pred x = x : filter pred xs
+--  | otherwise = filter pred xs
+
+-- tail recursive edition
+filter :: forall a. (a -> Boolean) -> List a -> List a
+filter pred = reverse <<< go Nil where
+  go filtered (x : xs)   
+    | pred x =  go (x : filtered) xs
+    | otherwise = go filtered xs
+
 test:: Effect Unit
 test = do
   log $ show $ flip const 1 2
@@ -129,3 +142,4 @@ test = do
   log $ show $ findLastIndex (_ == 10) (11 : 12 : Nil)
   log $ show $ reverse (10 : 20 : 30 : Nil)
   log $ show $ concat ((1 : 2 : 3 : Nil) : (4 : 5 : Nil) : (6 : Nil) : (Nil) : Nil)
+  log $ show $ filter (4 > _) $ (1 : 2 : 3 : 4 : 5 : 6 : Nil) 
