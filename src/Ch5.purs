@@ -1,6 +1,6 @@
 module Ch5 where
 
-import Prelude (Unit, (+), (-) ,(>), (<), (>=), (/=), (==), negate, show, discard, otherwise, type (~>))
+import Prelude (Unit, (+), (-) ,(>), (<), (>=), (/=), (==), (<<<), negate, show, discard, otherwise, type (~>))
 import Data.List (List(Nil, Cons), (:))
 import Effect (Effect)
 import Effect.Console (log) 
@@ -97,18 +97,48 @@ concat Nil = Nil
 concat (Nil : xss) = concat xss
 concat ((x : xs) : xss) = x : concat (xs : xss)
 
---filter :: forall a. (a -> Boolean) -> List a -> List a
---filter _ Nil = Nil
---filter pred (x : xs)  -- this is the way 
---  | pred x = x : filter pred xs
---  | otherwise = filter pred xs
+{-
+filter :: forall a. (a -> Boolean) -> List a -> List a
+filter _ Nil = Nil
+filter pred (x : xs)  -- this is the way not if's
+  | pred x = x : filter pred xs
+  | otherwise = filter pred xs
+-}
 
--- tail recursive edition
+--tail recursive edition
 filter :: forall a. (a -> Boolean) -> List a -> List a
 filter pred = reverse <<< go Nil where
+  go filtered Nil = filtered
   go filtered (x : xs)   
     | pred x =  go (x : filtered) xs
     | otherwise = go filtered xs
+
+catMaybes :: ∀ a. List (Maybe a) -> List a
+catMaybes Nil = Nil
+catMaybes (x : xs) = case x of 
+  Just y -> y : catMaybes xs
+  Nothing -> catMaybes xs
+
+{--
+range :: Int -> Int -> List Int
+range start end | start == end = singleton start
+                | otherwise = 
+                  start : range (start + if (start < end then 1 else (-1))) end
+
+range :: Int -> Int -> List Int
+range start end = go start where
+  go step start' | start' ==end = singleton start'
+                 | otherwise = start' : go step (start' + step)
+  step =  if start < end then 1 else (-1)
+--}
+
+
+range :: Int -> Int -> List Int
+range start end = go Nil end start where
+  go rl start' end' | start' == end' = start' : rl
+               | otherwise = go (start' : rl) (start' + step) end'
+  step = if start < end then (-1) else 1
+
 
 test:: Effect Unit
 test = do
@@ -143,3 +173,6 @@ test = do
   log $ show $ reverse (10 : 20 : 30 : Nil)
   log $ show $ concat ((1 : 2 : 3 : Nil) : (4 : 5 : Nil) : (6 : Nil) : (Nil) : Nil)
   log $ show $ filter (4 > _) $ (1 : 2 : 3 : 4 : 5 : 6 : Nil) 
+  log $ show $ catMaybes (Just 1 : Nothing : Just 2 : Nothing : Nothing : Just 5 : Nil)
+  log $ show $ range 1 10
+  log $ show $ range 3 (-3)
