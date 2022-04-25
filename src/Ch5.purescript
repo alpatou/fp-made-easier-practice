@@ -1,11 +1,11 @@
 module Ch5 where
 
+import Prelude (Unit, (+), (-) ,(>), (<), (>=), (/=), (==), (<<<), max, negate, show, discard, otherwise, type (~>))
 import Data.List (List(Nil, Cons), (:))
+import Effect (Effect)
+import Effect.Console (log) 
 import Data.Maybe (Maybe(..))
 import Data.Ord ((<))
-import Effect (Effect)
-import Effect.Console (log)
-import Prelude (Unit, (+), (-), (>), (<), (>=), (/=), (==), (<<<), max, negate, show, discard, otherwise, type (~>))
 
 flip:: forall a b c. (a->b->c) -> b -> a -> c
 flip func x y = func y x
@@ -184,9 +184,10 @@ dropWhile _ Nil = Nil
 dropWhile pred (x : xs) = if pred x then dropWhile pred xs else x : xs
 
 takeEnd :: forall a. Int -> List a -> List a
-takeEnd n l = drop (max 0 $ length l - n) l
+takeEnd _ Nil = Nil
+takeEnd howMuch (x:xs)
 
-test :: Effect Unit
+test:: Effect Unit
 test = do
   log $ show $ flip const 1 2
   flip const 1 2 # show # log
