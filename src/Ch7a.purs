@@ -17,6 +17,19 @@ derive instance genericMaybe :: Generic (Maybe a) _
 instance showMaybe :: Show a => Show (Maybe a) where
   show = genericShow
 
+data Either a b = Left a | Right b 
+                         
+type MyEitherVar = Either String (Maybe Int)
+
+derive instance eqEither :: (Eq a,Eq b) => Eq (Either a b) 
+derive instance ordEither :: (Ord a, Ord b) => Ord (Either a b)
+derive instance genericEither :: Generic (Either a b) _
+instance showEither :: (Show a, Show b) => Show (Either a b) where
+  show = genericShow
+                  
+{-
+  EQ Ord and Show
+-}
 {-
 instance eqMaybe :: Eq a => Eq (Maybe a) where
   eq Nothing Nothing = true
@@ -57,5 +70,10 @@ test = do
   log $ show $ Just 99 < Nothing 
   log $ show $ Just "abc" 
   log $ show $ (Nothing :: Maybe Unit) 
+  let x = Left "left" :: MyEitherVar
+      y :: MyEitherVar
+      y = Right $ Just 42
+  log $ show $ x
+  log $ show $ y
 
 
