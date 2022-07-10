@@ -1,9 +1,11 @@
 module Ch7b where
   
+import Data.Monoid
 import Prelude
 
 import Data.Generic.Rep (class Generic)
 import Data.Int (fromString)
+import Data.List (List(..), (:))
 import Data.Maybe (Maybe(..))
 import Data.Newtype (class Newtype)
 import Data.Show.Generic (genericShow)
@@ -30,17 +32,13 @@ instance showFullName :: Show FullName where
   show (FullName name) = name
 
 newtype Age = Age Int
-
 derive instance newtypeAge :: Newtype Age _
 derive newtype instance showAge :: Show Age
 derive instance eqAge :: Eq Age
 
 data Occupation = Doctor | Dentist | Lawyer | Unemployed
-
 derive instance eqOccupation :: Eq Occupation
-
 derive instance genericOccupation :: Generic Occupation _
-
 instance showOccupation :: Show Occupation where 
   show = genericShow
 
@@ -76,6 +74,12 @@ instance fromCSVPerson :: FromCSV Person where
         }
     _ -> Nothing
 
+
+combineListOfMonoids :: ∀ a. Monoid a => List a -> a 
+combineListOfMonoids = go mempty where 
+  go c Nil = c 
+  go c (x : xs) = go (c <> x) xs
+
 test :: Effect Unit
 test = do
   log $ show $ toCSV -- COMPILER ERROR! ❶
@@ -96,3 +100,4 @@ test = do
         , occupation: Doctor
         }
   log $ show $ (toCSV person # fromCSV) == Just person
+  log $ show $ combineListOfMonoids ("a":"b":"c":Nil)
